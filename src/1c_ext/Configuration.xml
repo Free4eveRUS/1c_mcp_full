@@ -50,6 +50,7 @@
 			<DataProcessor>mcp_УправлениеСервером</DataProcessor>
 			<DataProcessor>mcp_ИнструментДанныеОКонфигурации</DataProcessor>
 			<DataProcessor>mcp_ИнструментДанные1С</DataProcessor>
+			<DataProcessor>mcp_ИнструментИдемпотентныеОперации</DataProcessor>
 			<DataProcessor>mcp_РесурсОписаниеСинтаксисаВстроенногоЯзыка</DataProcessor>
 			<DataProcessor>mcp_Компоненты</DataProcessor>
 		</ChildObjects>
