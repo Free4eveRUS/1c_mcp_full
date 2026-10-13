@@ -7,4 +7,8 @@
 		<name>DataProcessor.mcp_ИнструментДанные1С</name>
 		<right><name>Use</name><value>true</value></right>
 	</object>
+	<object>
+		<name>DataProcessor.mcp_ИнструментИдемпотентныеОперации</name>
+		<right><name>Use</name><value>true</value></right>
+	</object>
 </Rights>
