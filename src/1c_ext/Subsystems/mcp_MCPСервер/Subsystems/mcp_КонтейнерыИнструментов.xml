@@ -13,6 +13,7 @@
 			<Content>
 				<xr:Item xsi:type="xr:MDObjectRef">DataProcessor.mcp_ИнструментДанныеОКонфигурации</xr:Item>
 				<xr:Item xsi:type="xr:MDObjectRef">DataProcessor.mcp_ИнструментДанные1С</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">DataProcessor.mcp_ИнструментИдемпотентныеОперации</xr:Item>
 			</Content>
 		</Properties>
 		<ChildObjects/>
