@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 BSL = ROOT / "src/1c_ext/DataProcessors/mcp_ИнструментДанные1С/Ext/ManagerModule.bsl"
+EXECUTION = ROOT / "src/1c_ext/CommonModules/mcp_Выполнение/Ext/Module.bsl"
 CONFIG = ROOT / "src/1c_ext/Configuration.xml"
 SUBSYSTEM = ROOT / "src/1c_ext/Subsystems/mcp_MCPСервер/Subsystems/mcp_КонтейнерыИнструментов.xml"
 ROLE = ROOT / "src/1c_ext/Roles/mcp_ИнструментДанные1С.xml"
@@ -71,6 +72,13 @@ def test_batch_has_transaction_and_rollback():
     assert "ЗафиксироватьТранзакцию()" in text
     assert "ОтменитьТранзакцию()" in text
     assert "Вложенный onec_batch запрещен" in text
+
+
+def test_full_tool_results_cross_mcp_boundary_as_json_text():
+    text = read(EXECUTION)
+    assert 'ИмяОбработки = "mcp_ИнструментДанные1С"' in text
+    assert "mcp_ОбщегоНазначения.ЗначениеВJSON(РезультатВыполнения)" in text
+    assert "mcp_Содержимое.ТекстовоеСодержимое(JSONРезультат)" in text
 
 
 def test_no_dynamic_bsl_execution_primitive_added():
