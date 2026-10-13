@@ -3,12 +3,7 @@
 	<Subsystem uuid="41b9e681-c136-4c1a-865d-048761425ac7">
 		<Properties>
 			<Name>mcp_КонтейнерыИнструментов</Name>
-			<Synonym>
-				<v8:item>
-					<v8:lang>ru</v8:lang>
-					<v8:content>Контейнеры инструментов</v8:content>
-				</v8:item>
-			</Synonym>
+			<Synonym><v8:item><v8:lang>ru</v8:lang><v8:content>Контейнеры инструментов</v8:content></v8:item></Synonym>
 			<Comment/>
 			<IncludeHelpInContents>true</IncludeHelpInContents>
 			<IncludeInCommandInterface>false</IncludeInCommandInterface>
@@ -17,6 +12,7 @@
 			<Picture/>
 			<Content>
 				<xr:Item xsi:type="xr:MDObjectRef">DataProcessor.mcp_ИнструментДанныеОКонфигурации</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">DataProcessor.mcp_ИнструментДанные1С</xr:Item>
 			</Content>
 		</Properties>
 		<ChildObjects/>
