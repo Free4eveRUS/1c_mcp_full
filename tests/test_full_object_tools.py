@@ -75,6 +75,7 @@ def test_batch_has_transaction_and_rollback():
 
 def test_no_dynamic_bsl_execution_primitive_added():
     text = read(BSL)
-    forbidden = ["Выполнить(", "Вычислить("]
-    for token in forbidden:
-        assert token not in text, token
+    # Запрос.Выполнить() is a normal query method and must remain allowed.
+    # Block only standalone dynamic-language execution primitives.
+    assert not re.search(r"(?mi)^\s*Выполнить\s*\(", text)
+    assert not re.search(r"(?mi)(?<!\.)\bВычислить\s*\(", text)
