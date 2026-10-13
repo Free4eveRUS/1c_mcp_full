@@ -9,8 +9,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: python -m pip install pytest
       - run: pytest -q
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Download BSL Language Server 1.0.7
+        shell: bash
+        run: |
+          curl -fL --retry 3 \
+            https://github.com/1c-syntax/bsl-language-server/releases/download/v1.0.7/bsl-language-server-1.0.7-exec.jar \
+            -o /tmp/bsl-language-server.jar
+          echo "9f62765edd344d66456da24c906eaf623a03c56e90e5aafee466200100909f64  /tmp/bsl-language-server.jar" | sha256sum -c -
+
+      - name: Check BSL parse errors
+        shell: bash
+        run: |
+          mkdir -p /tmp/bsl-report
+          set -o pipefail
+          java -Xmx2g -jar /tmp/bsl-language-server.jar analyze \
+            --srcDir src/1c_ext \
+            --workspaceDir src/1c_ext \
+            --configuration .bsl-language-server.json \
+            --outputDir /tmp/bsl-report \
+            --reporter console | tee /tmp/bsl-console.log
+          if grep -Eq 'code = "(ParseError|QueryParseError)"' /tmp/bsl-console.log; then
+            echo "BSL parser reported syntax errors"
+            exit 1
+          fi
