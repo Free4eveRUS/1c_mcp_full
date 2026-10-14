@@ -60,6 +60,7 @@ def test_idempotent_tools_are_registered_and_dispatched():
     for tool in IDEMPOTENT_TOOLS:
         assert text.count(f'"{tool}"') >= 2, tool
     assert 'ПараметрИнструмента("idempotencyKey"' in text
+    assert 'ПараметрИнструмента("matchFields"' in text
 
 
 def test_container_is_registered_in_configuration_and_subsystem():
@@ -100,6 +101,32 @@ def test_idempotent_creation_assigns_command_uuid_before_write():
     assert "ПолучитьСсылку(\"Documents\", Аргументы.targetDocument, КлючИдемпотентности)" in text
     assert text.count("УстановитьСсылкуНового") >= 3
     assert text.count("СсылкаСуществует") >= 4
+
+
+def test_match_fields_lookup_precedes_creation_and_does_not_mutate_match():
+    text = read(IDEMPOTENT_BSL)
+    write_body = function_body(text, "ИдемпотентноЗаписатьОбъект")
+
+    match_lookup = write_body.index("НайтиЕдинственнуюСсылкуПоПолям")
+    match_return = write_body.index("СуществующаяСсылка.ПолучитьОбъект()")
+    catalog_create = write_body.index("Объект = Справочники[Имя].СоздатьЭлемент()")
+    document_create = write_body.index("Объект = Документы[Имя].СоздатьДокумент()")
+    apply_fields = write_body.index("ПрименитьПоля(Объект")
+
+    assert match_lookup < catalog_create
+    assert match_lookup < document_create
+    assert match_return < apply_fields
+
+
+def test_match_fields_lookup_is_exact_and_rejects_ambiguity():
+    text = read(IDEMPOTENT_BSL)
+    body = function_body(text, "НайтиЕдинственнуюСсылкуПоПолям")
+
+    assert "ВЫБРАТЬ ПЕРВЫЕ 2 Объект.Ссылка" in body
+    assert "ПроверитьПолеОбъекта(МД, Пара.Ключ)" in body
+    assert "ДекодироватьЗначение(Пара.Значение)" in body
+    assert 'Условия.Добавить("Объект." + Пара.Ключ + " = &" + ИмяПараметра)' in body
+    assert "matchFields неоднозначен: найдено более одного объекта" in body
 
 
 def test_idempotent_replay_returns_existing_object_before_creation():
