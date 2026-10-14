@@ -37,6 +37,13 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8-sig")
 
 
+def function_body(text: str, name: str) -> str:
+    marker = f"Функция {name}("
+    start = text.index(marker)
+    end = text.index("КонецФункции", start)
+    return text[start:end]
+
+
 def test_metadata_xml_is_well_formed():
     for path in [CONFIG, SUBSYSTEM, ROLE, RIGHTS, IDEMPOTENT_META]:
         ET.parse(path)
@@ -97,10 +104,40 @@ def test_idempotent_creation_assigns_command_uuid_before_write():
 
 def test_idempotent_replay_returns_existing_object_before_creation():
     text = read(IDEMPOTENT_BSL)
-    assert "Если СсылкаСуществует(МетаТип, Имя, СсылкаИдемпотентности) Тогда" in text
-    assert "Если СсылкаСуществует(\"Documents\", Аргументы.targetDocument, СсылкаНового) Тогда" in text
-    assert "СсылкаИдемпотентности.ПолучитьОбъект()" in text
-    assert "СсылкаНового.ПолучитьОбъект()" in text
+    write_body = function_body(text, "ИдемпотентноЗаписатьОбъект")
+    basis_body = function_body(text, "ИдемпотентноСоздатьНаОсновании")
+
+    write_guard = write_body.index(
+        "Если СсылкаСуществует(МетаТип, Имя, СсылкаИдемпотентности) Тогда"
+    )
+    catalog_create = write_body.index("Объект = Справочники[Имя].СоздатьЭлемент()")
+    document_create = write_body.index("Объект = Документы[Имя].СоздатьДокумент()")
+    assert write_guard < catalog_create
+    assert write_guard < document_create
+    assert "СсылкаИдемпотентности.ПолучитьОбъект()" in write_body
+
+    basis_guard = basis_body.index(
+        'Если СсылкаСуществует("Documents", Аргументы.targetDocument, СсылкаНового) Тогда'
+    )
+    basis_create = basis_body.index(
+        "Документ = Документы[Аргументы.targetDocument].СоздатьДокумент()"
+    )
+    assert basis_guard < basis_create
+    assert "СсылкаНового.ПолучитьОбъект()" in basis_body
+
+
+def test_deterministic_link_is_assigned_before_first_write():
+    text = read(IDEMPOTENT_BSL)
+    write_body = function_body(text, "ИдемпотентноЗаписатьОбъект")
+    basis_body = function_body(text, "ИдемпотентноСоздатьНаОсновании")
+
+    first_write_link = write_body.index("Объект.УстановитьСсылкуНового")
+    first_write = write_body.index("Объект.Записать()")
+    assert first_write_link < first_write
+
+    basis_link = basis_body.index("Документ.УстановитьСсылкуНового(СсылкаНового)")
+    basis_write = basis_body.index("ЗаписатьДокументВРежиме(Документ")
+    assert basis_link < basis_write
 
 
 def test_batch_has_transaction_and_rollback():
